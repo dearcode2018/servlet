@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    
+    <!-- Cascading Style Sheet -->
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link rel="stylesheet" type="text/css" href="../css/sys.css">
+    <!-- 供应商样式 -->
+    <!-- <!-- <link rel="stylesheet" type="text/css" href="../css/vendor/xx.css">     --> 
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" type="text/css" href="../css/sys.css">    
+    <!-- 公共库 -->
+    <script src="../js/base/core.js"></script>
+    <script src="../js/base/main.js"></script>
+    <script src="../js/base/sys.js"></script>
+    <script src="../js/base/plugins.js"></script>
+    <script src="../js/base/sys.js"></script>
+	<!-- 供应商Js库 -->
+	<script src="../js/vendor/jquery/jquery-2.1.0.js"></script>   
+	<script src="../js/vendor/jquery/jquery-plugin.js"></script>   
+	
+	<!-- JavaScript part -->
+	<script type="text/javascript" lang="JavaScript">
+		/* 页面通用部分 */
+		
+	</script>	
+  </head>
+  
+<body>
+  	<!-- 数据展示部分 -->
+	<table style="border: 1px;">
+		<thead>
+			<tr>
+				<td>用户名</td><td>密码</td><td>所在区域</td>
+				<td>详细信息</td><td>创建时间</td><td>更新时间</td>
+			</tr>
+		</thead>
+		<tbody id="tbodyId"></tbody>
+		<tfoot></tfoot>
+	</table>
+
+  
+  
+  
+ 	<script type="text/javascript" lang="JavaScript">
+		/* 页面测试部分 */
+		
+		// 提交请求
+		function getPageData() {
+			var currentPage = $("#currentPage").val();
+			var url = APP_ROOT + "/PagerServlet?currentPage=" + currentPage;
+			var resultObj = $("#showResult");
+			//return;
+			// ajax 请求
+			$.ajax({
+				// 是否缓存页面
+				cache : false,
+				type : "POST",
+				url : url ,
+			 	dataType : "json",
+			 	contentType: "application/json; charset=utf8",
+			 	/* 发送请求前 - 调用 */
+			 	beforeSend : function(xhr) {
+			 		$("#requestTip").val("正在处理，请稍等...");
+			 	},
+			 	/* 请求完成 (请求成功或失败均调用) */
+			 	complete : function(xhr, textStatus) {
+			 		$("#completeResult").val(textStatus);
+			 		$("#requestTip").val("已经完成处理!");
+			 	},
+			 	/* 请求处理失败 */
+			 	error : function(xhr, textStatus, errorThrown) {
+			 		$("#errorResult").val(textStatus + ": " + errorThrown);
+			 		//resultObj.html(textStatus + ": " + "服务器处理失败");
+			 		// error: 服务器处理失败Internal Server Error
+			 		//resultObj.html(textStatus + ": " + "服务器处理失败" + errorThrown);
+			 	},
+			 	success : function(data, textStatus, xhr) {
+			 		// 清空请求错误结果显示
+			 		$("#errorResult").val("");
+			 		// 返回 data 是一个 js 对象
+			 		// 将 js 对象转成 json 格式字符串
+			 		var resultJson = JSON.stringify(data);
+			 		resultObj.html(resultJson);
+			 		var dataList = data.beanList;
+			 		var tbody = $("#tbodyId");
+					var builder = new StringBuilder();
+					var item = null;
+					// 页总数
+					$("#pageCount").val(data.pageCount);
+					// 当前页
+					$("#currentPage").val(data.currentPage);
+					// 总记录数
+					$("#dataSize").val(data.dataSize);
+			 		for (var i = 0; i < dataList.length; i++) {
+			 			item = dataList[i];
+			 			builder.append("<tr>");
+			 			
+			 			builder.append("<td>" + item.username + "</td>");
+			 			builder.append("<td>" + item.password + "</td>");
+			 			builder.append("<td>" + item.location + "</td>");
+			 			builder.append("<td>" + item.info + "</td>");
+			 			builder.append("<td>" + item.createTime + "</td>");
+			 			builder.append("<td>" + item.updateTime + "</td>");
+			 			
+			 			builder.append("</tr>");
+			 		}
+			 		tbody.html(builder.toString());
+			 		
+			 	},
+			});
+		}
+		
+	</script>
+  <fieldset title="操作面板">
+  	请求提示 : <input type="text" id="requestTip" name="" size="30" readonly="readonly" />
+  	请求完成 : <input type="text" id="completeResult" name="" size="30" readonly="readonly" />
+  	请求错误 : <input type="text" id="errorResult" name="" size="30" readonly="readonly" />
+  	<br />
+  </fieldset>  
+  
+  
+ 	<script type="text/javascript" lang="JavaScript">
+		/* 页面测试部分 */
+		
+		/**
+		// 禁用表单
+		$("#firstPage").attr("disabled", "disabled");
+		$("#prePage").attr("disabled", "disabled");
+		$("#nextPage").attr("disabled", "disabled");
+		$("#lastPage").attr("disabled", "disabled");
+		$("#currentPage").attr("disabled", "disabled");
+		$("#goToPage").attr("disabled", "disabled");
+		
+		// 启用表单
+		$("#firstPage").attr("disabled", null);
+		$("#prePage").attr("disabled", null);
+		$("#nextPage").attr("disabled", null);
+		$("#lastPage").attr("disabled", null);
+		$("#currentPage").attr("disabled", null);
+		$("#goToPage").attr("disabled", null);
+		
+		// 页总数
+		$("#pageCount").val();
+		// 当前页
+		$("#currentPage").val();
+		*/
+		
+		/* 分页 */
+
+		$(function () {
+			// 
+			pageLoad();
+		});
+		
+		// 页面加载
+		function pageLoad() {
+			// 
+			pageHandle(1);
+		}
+		
+		// 分页处理
+		function pageHandle(pageNo) {
+			// 转成整数
+			var pageCount = parseInt($("#pageCount").val());
+			var dataSize = parseInt($("#dataSize").val());
+			//alert(dataSize);
+			// 修改当前页数
+			$("#currentPage").val(pageNo);
+			var currentPage = pageNo;
+			if (pageCount <= 1) {
+				// 页总数为 0 或 1，禁用所有分页表单
+				$("#firstPage").attr("disabled", "disabled");
+				$("#prePage").attr("disabled", "disabled");
+				$("#nextPage").attr("disabled", "disabled");
+				$("#lastPage").attr("disabled", "disabled");
+				//$("#currentPage").attr("disabled", "disabled");
+				//$("#goToPage").attr("disabled", "disabled");
+				
+				return;
+			} /* else if (currentPage > pageCount) {
+				// 当前页数大于总页数
+				$("#firstPage").attr("disabled", "disabled");
+				$("#prePage").attr("disabled", "disabled");
+				$("#nextPage").attr("disabled", "disabled");
+				$("#lastPage").attr("disabled", "disabled");
+			} */
+			if (1 == currentPage) {
+				//alert("当前页为第一页");
+				// 首页页
+				// 禁用 首页/上一页 按钮
+				$("#firstPage").attr("disabled", "disabled");
+				$("#prePage").attr("disabled", "disabled");
+			} else if (pageCount == currentPage) {
+				//alert("当前页为最后一页");
+				// 尾页
+				// 禁用 尾页/下一页 按钮
+				$("#nextPage").attr("disabled", "disabled");
+				$("#lastPage").attr("disabled", "disabled");
+			} else if (pageNo > currentPage) {
+				// 输入的值 大于 页总数，禁用分页表单
+				$("#firstPage").attr("disabled", "disabled");
+				$("#prePage").attr("disabled", "disabled");
+				$("#nextPage").attr("disabled", "disabled");
+				$("#lastPage").attr("disabled", "disabled");
+			}
+			
+			// 调用数据请求
+			getPageData();
+		}
+		
+		// 首页
+		function firstPage() {
+			// 禁用按钮
+			$("#firstPage").attr("disabled", "disabled");
+			$("#prePage").attr("disabled", "disabled");
+			var pageNo = 1;
+			// 启用 下一页/尾页 按钮
+			$("#nextPage").attr("disabled", null);
+			$("#lastPage").attr("disabled", null);
+			$("#currentPage").attr("disabled", null);
+			$("#goToPage").attr("disabled", null);			
+			pageHandle(pageNo);
+		}
+		
+		// 上一页
+		function prePage() {
+			var pageNo = parseInt($("#currentPage").val()) - 1;
+			$("#nextPage").attr("disabled", null);
+			$("#lastPage").attr("disabled", null);
+			pageHandle(pageNo);
+		}
+		
+		// 跳转
+		function goToPage() {
+			var pageNo = parseInt($("#currentPage").val());
+			if (pageNo <= 0) {
+				pageNo = 1;
+			}
+			pageHandle(pageNo);
+		}
+		
+		// 下一页
+		function nextPage() {
+			var pageNo = parseInt($("#currentPage").val()) + 1;
+			// 激活
+			$("#firstPage").attr("disabled", null);
+			$("#prePage").attr("disabled", null);
+			pageHandle(pageNo);
+		}
+		
+		// 尾页
+		function lastPage() {
+			// 禁用按钮
+			$("#nextPage").attr("disabled", "disabled");
+			$("#lastPage").attr("disabled", "disabled");
+			var pageNo = parseInt($("#pageCount").val());
+			$("#firstPage").attr("disabled", null);
+			$("#prePage").attr("disabled", null);
+			pageHandle(pageNo);
+		}
+		
+	</script>	  	 
+	
+	<div>
+		<button id="firstPage" onclick="firstPage();">首页</button>
+		<button id="prePage" onclick="prePage();">上一页</button>
+		总共<input type="text" value="" id="dataSize" readonly="readonly" size="5" />条记录
+		总共<input type="text" value="" id="pageCount" readonly="readonly" size="5" /> 页
+		第<input type="text" value="1" id="currentPage" size="5" maxlength="5" />页
+		<input type="button" value="跳转" id="goToPage" onclick="goToPage();" />
+		<button id="nextPage" onclick="nextPage();">下一页</button>
+		<button id="lastPage" onclick="lastPage();">尾页</button>
+		<input type="hidden" value="" id="pageCount" />
+	</div>
+    
+    <!-- JavaScript part -->
+	<script type="text/javascript" lang="JavaScript">
+		/* 页面底部分 */
+		
+	</script>	 
+  </<body>
+</html>

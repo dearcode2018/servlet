@@ -1,0 +1,62 @@
+/**
+ * 描述: 
+ * BaseTest.java
+ * 
+ * @author qye.zheng
+ *  version 1.0
+ */
+package com.hua.test;
+
+// 静态导入
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.PropertyConfigurator;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
+import com.hua.controller.BaseServlet;
+import com.hua.util.ClassPathUtil;
+
+/**
+ * 描述: 测试基类
+ * 包含多个测试示例
+ * 
+ * @author qye.zheng
+ * BaseTest
+ */
+//@RunWith()
+public class BaseTest  extends BaseServlet {
+	
+	private static final String FILE_PATH = "/conf/properties/log4j.properties";
+	
+	/* apache commons log */
+	protected Log log = LogFactory.getLog(this.getClass().getName());
+	
+	static {
+		// 初始化 log4j 环境
+		PropertyConfigurator.configure(ClassPathUtil.getClassSubpath(FILE_PATH));
+	}
+	
+	/**
+	 * 
+	 * 描述: [所有测试]开始之前运行
+	 * @author qye.zheng
+	 * 
+	 */
+	@BeforeClass
+	public static void beforeClass() {
+		System.out.println("beforeClass()");
+	}
+	
+	/**
+	 * 
+	 * 描述: [所有测试]结束之后运行
+	 * @author qye.zheng
+	 * 
+	 */
+	@AfterClass
+	public static void afterClass() {
+		System.out.println("afterClass()");
+	}
+
+}

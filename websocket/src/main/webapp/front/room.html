@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>视频会议-广州会议室</title>
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+</head>
+<body>
+
+  <div id="videos">
+    <video id="localVideo" autoplay idth="263" height="200" 
+    style="position: absolute; left: 5px; bottom: 5px;"></video>
+  </div>
+
+	<div><textarea id="userInput" rows="10" cols="20"></textarea></div>
+	<div>
+		<input type="submit" value="发送" onclick="sendMsg()" />
+	</div>
+	<table>
+		<tr><td>房间编码(1 - 10): </td><td><input type="text" id="roomId" value="1" /></td>
+		<td>房码密码(123456):</td><td><input type="password" id="password" value="123456" /></td></tr>
+		<tr><td>昵称: </td><td><input type="text" id="nickname" name="nickname" value="郑乾业"></td>
+		<td></td><td><input type="button" value="进入房间" onclick="enterRoom();" /></td></tr>
+	</table>
+	<div>
+		
+		 
+	</div>
+	
+
+	<div id="messages"></div>
+	<script type="text/javascript">
+		/*
+		客户端总体描述
+		1) 客户端进入房间验证，使用socket通信
+		2) 判断浏览器是否支持对等通讯，支持则打开音视频连接
+		3) 进入房间、打开音视频连接，进入聊天阶段
+		4)
+		
+		*/
+		// 是否支持对等连接
+		var PeerConnection = window.PeerConnection 
+		|| window.webkitPeerConnection00 || window.webkitRTCPeerConnection 
+		|| window.mozRTCPeerConnection || window.RTCPeerConnection;
+		// 房间id
+		var roomId = document.getElementById("roomId").value;
+		// 房间密码
+		var password = document.getElementById("password").value;
+		// websocket url
+		var wsUrl = "ws://172.16.100.10:8080//websocket/ws/chat/client?roomId=" + roomId + "&password=" + password;
+		var webSocket = null;
+		
+		/* 进入房间 */
+		function enterRoom() {
+			webSocket = new WebSocket(wsUrl);
+			var videos = document.getElementById("videos");
+			
+			webSocket.onerror = function(event) {
+				onError(event);
+			};
+
+			webSocket.onopen = function(event) {
+				onOpen(event);
+				// socket 成功打开，再打开本地媒体设备
+				getUserMedia();
+			};
+
+			webSocket.onmessage = function(event) {
+				onMessage(event)
+			};
+
+			function onMessage(event) {
+				document.getElementById('messages').innerHTML 
+					+= '<br />' + event.data;
+			}
+		}
+		
+		/* 打开socket连接 */
+		function onOpen(event) {
+			document.getElementById('messages').innerHTML 
+				= 'Connection established';
+		}
+
+		/* socket连接错误 */
+		function onError(event) {
+			alert(event.data);
+		}
+
+		/* 本地发送消息 */
+		function sendMsg() {
+			var text = document.getElementById("userInput").value;
+			// 发送完毕，清除输入框
+			document.getElementById("userInput").value = "";
+			webSocket.send(text);
+			
+			return false;
+		}
+		
+		/* 获取用户媒体-本地音视频设备 */
+		function getUserMedia() {
+			try {
+				navigator.webkitGetUserMedia({
+							'audio' : true,
+							'video' : true
+						}, onUserMediaSuccess, onUserMediaError);
+				console.log("Requested access to local media with new syntax.");
+			} catch (e) {
+				try {
+					navigator.webkitGetUserMedia("video,audio", onUserMediaSuccess,
+							onUserMediaError);
+					console.log("Requested access to local media with old syntax.");
+				} catch (e) {
+					alert("webkitGetUserMedia() failed. Is the MediaStream flag enabled in about:flags?");
+					console.log("webkitGetUserMedia failed with exception: "
+							+ e.message);
+				}
+			}
+		}				
+		
+		/* 用户媒体错误 */
+		function onUserMediaError()
+		{
+			console.log("user media error");
+		}
+
+		/* 用户媒体成功 */
+		function onUserMediaSuccess(stream) {
+			console.log("User has granted access to local media.");
+			document.getElementById("localVideo").src = URL.createObjectURL(stream);
+			// 播放本地视频
+		    document.getElementById("localVideo").play();
+		}	
+	
+	 //接收到其他用户的视频流
+	  rtc.on('pc_add_stream', function(stream, socketId) {
+	    var newVideo = document.createElement("video"),
+	        id = "other-" + socketId;
+	    newVideo.setAttribute("class", "other");
+	    newVideo.setAttribute("autoplay", "autoplay");
+	    newVideo.setAttribute("id", id);
+	    videos.appendChild(newVideo);
+	    rtc.attachStream(stream, id);
+	  });	
+		
+	</script>
+</body>
+</html>
