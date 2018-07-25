@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>websocket</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+	<!-- JavaScript part -->
+	<script type="text/javascript" lang="JavaScript">
+	
+		/* 页面通用部分 */
+		var wsUrl = "ws://127.0.0.1:8080/websocket/ws/message";
+		var ws = new WebSocket(wsUrl);
+		
+		ws.onopen = function(){ws.send("open ... 111")};
+		
+		ws.onmessage = function(evt){
+		
+		//console.log(evt.data);
+		alert(evt.data);
+		
+		};
+		
+		ws.onclose = function(evt) {console.log("close 333");};
+		
+		ws.onerror = function(evt) {console.log("error 222");};
+		
+	</script>	
+	<style type="text/css">
+		#login
+		{
+			width:400px;
+			height: 200px;
+			position:absolute; 
+			top: 50%;
+			left: 50%;
+			margin:-100px 0 0 -200px;
+			border:1px solid red; 
+			background-color: #097;
+		}
+		
+		#header
+		{
+			background-color: yellow;
+			margin-top: 20px;
+			margin-bottom: 20px;
+			/* 文本居中对齐 */
+			text-align: center;
+		}
+		
+		#username
+		{
+			margin-bottom: 20px;
+		}
+		
+		#password
+		{
+			margin-bottom: 20px;
+		}
+		
+		#loginBtn
+		{
+		
+		}								
+	</style>
+  </head>
+  
+  <body>
+	<script type="text/javascript" lang="javascript">
+	</script>
+  </<body>
+</html>
