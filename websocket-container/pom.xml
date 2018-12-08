@@ -6,9 +6,9 @@
 		<artifactId>servlet-entire</artifactId>
 		<version>0.0.1</version>
 	</parent>	
-	<artifactId>websocket</artifactId>
+	<artifactId>websocket-container</artifactId>
 	<packaging>war</packaging>
-	<name>websocket</name>
+	<name>websocket-container</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
